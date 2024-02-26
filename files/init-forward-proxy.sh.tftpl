@@ -1,0 +1,20 @@
+#!/bin/bash
+
+sudo apt update -y && sudo apt install apache2 -y
+sudo a2enmod proxy proxy_http proxy_connect
+sudo cat <<EOF > /etc/apache2/sites-available/fwd-proxy.conf
+Listen 8080
+<VirtualHost *:8080>
+    ServerAdmin webmaster@localhost
+    DocumentRoot /var/www/html
+    ProxyRequests On
+    ProxyVia On
+    <Proxy "*">
+        Require ip ${subent}
+    </Proxy>
+</VirtualHost>
+EOF
+sudo chown root:root /etc/apache2/sites-available/fwd-proxy.conf
+sudo chmod 0644 /etc/apache2/sites-available/fwd-proxy.conf
+sudo a2ensite fwd-proxy
+sudo systemctl restart apache2
